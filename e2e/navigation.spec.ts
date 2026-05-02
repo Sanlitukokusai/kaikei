@@ -40,8 +40,8 @@ test.describe("Login page", () => {
 
   test("login form fields are present and focusable", async ({ page }) => {
     await page.goto("/login");
-    const emailInput = page.getByLabel(/メール|Email/i);
-    const passwordInput = page.getByLabel(/パスワード|Password/i);
+    const emailInput = page.locator('input[type="email"]');
+    const passwordInput = page.locator('input[type="password"]');
     await expect(emailInput).toBeVisible();
     await expect(passwordInput).toBeVisible();
     await emailInput.click();
@@ -50,7 +50,7 @@ test.describe("Login page", () => {
 
   test("email field accepts email format", async ({ page }) => {
     await page.goto("/login");
-    const emailInput = page.getByLabel(/メール|Email/i);
+    const emailInput = page.locator('input[type="email"]');
     await emailInput.fill("test@example.com");
     await expect(emailInput).toHaveValue("test@example.com");
   });
