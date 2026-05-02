@@ -10,7 +10,6 @@ const customConfig: Config = {
     "^server-only$": "<rootDir>/src/__mocks__/server-only.ts",
     "^next/cache$": "<rootDir>/src/__mocks__/next-cache.ts",
     "^next/navigation$": "<rootDir>/src/__mocks__/next-navigation.ts",
-    "^@/lib/supabase$": "<rootDir>/src/__mocks__/supabase.ts",
     "^@/(.*)$": "<rootDir>/src/$1",
   },
   testMatch: ["<rootDir>/src/__tests__/**/*.test.{ts,tsx}"],
