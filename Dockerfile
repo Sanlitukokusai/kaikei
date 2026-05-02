@@ -17,9 +17,13 @@ COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1
-# Placeholder env vars only at build-time. Real values come from Zeabur runtime env.
-ENV NEXT_PUBLIC_SUPABASE_URL=https://placeholder.supabase.co
-ENV NEXT_PUBLIC_SUPABASE_ANON_KEY=placeholder
+# NEXT_PUBLIC_* vars are inlined into the client bundle at build time.
+# Zeabur must pass these as build args (Service → Settings → Build Arguments),
+# otherwise the deployed app will use placeholders and auth will be broken.
+ARG NEXT_PUBLIC_SUPABASE_URL=https://placeholder.supabase.co
+ARG NEXT_PUBLIC_SUPABASE_ANON_KEY=placeholder
+ENV NEXT_PUBLIC_SUPABASE_URL=$NEXT_PUBLIC_SUPABASE_URL
+ENV NEXT_PUBLIC_SUPABASE_ANON_KEY=$NEXT_PUBLIC_SUPABASE_ANON_KEY
 RUN npm run build
 
 FROM node:22-alpine AS runner
