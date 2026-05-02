@@ -2,15 +2,8 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { DEMO_COMPANY_ID, actionClient } from "@/lib/supabase";
-
-export type JournalLineInput = {
-  side: "debit" | "credit";
-  account_id: string;
-  partner_id?: string | null;
-  amount_jpy: number;
-  tax_category?: string | null;
-  memo?: string | null;
-};
+import { ensureBalanced, type JournalLineInput } from "@/lib/journal-validation";
+export type { JournalLineInput };
 
 export type CreateJournalEntryInput = {
   entry_date: string;
@@ -21,15 +14,6 @@ export type CreateJournalEntryInput = {
   source_id?: string | null;
   lines: JournalLineInput[];
 };
-
-export function ensureBalanced(lines: JournalLineInput[]) {
-  const dr = lines.filter((l) => l.side === "debit").reduce((s, l) => s + (l.amount_jpy ?? 0), 0);
-  const cr = lines.filter((l) => l.side === "credit").reduce((s, l) => s + (l.amount_jpy ?? 0), 0);
-  if (dr !== cr) {
-    throw new Error(`借方 ¥${dr.toLocaleString()} / 貸方 ¥${cr.toLocaleString()} が一致しません`);
-  }
-  if (dr === 0) throw new Error("金額が 0 円の仕訳は登録できません");
-}
 
 export async function createJournalEntry(input: CreateJournalEntryInput) {
   const sb = await actionClient();

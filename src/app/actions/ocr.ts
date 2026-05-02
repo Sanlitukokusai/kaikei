@@ -1,15 +1,6 @@
 "use server";
-
-export type OcrResult = {
-  vendor_name: string | null;
-  entry_date: string | null; // YYYY-MM-DD
-  total_amount: number | null;
-  tax_amount: number | null;
-  tax_rate: "課税10%" | "課税8%" | "非課税" | null;
-  registration_no: string | null; // T + 13 digits (適格請求書登録番号)
-  description: string | null;
-  confidence: number; // 0-1
-};
+import { parseOcrJson, type OcrResult } from "@/lib/ocr-parser";
+export type { OcrResult };
 
 // DashScope OpenAI-compatible endpoint (international region)
 const DASHSCOPE_BASE = "https://dashscope-intl.aliyuncs.com/compatible-mode/v1";
@@ -92,19 +83,5 @@ export async function ocrReceipt(formData: FormData): Promise<OcrResult> {
   };
   const json = (await res.json()) as ChatResponse;
   const text = json.choices?.[0]?.message?.content ?? "";
-  const jsonMatch = text.match(/\{[\s\S]*\}/);
-  if (!jsonMatch) throw new Error("OCR結果の解析に失敗しました");
-
-  try {
-    return JSON.parse(jsonMatch[0]) as OcrResult;
-  } catch {
-    throw new Error("OCR結果のJSON解析に失敗しました");
-  }
-}
-
-/** Extract and parse a JSON block from raw LLM output. Exported for testing. */
-export function parseOcrJson(raw: string): OcrResult {
-  const match = raw.match(/\{[\s\S]*\}/);
-  if (!match) throw new Error("OCR結果の解析に失敗しました");
-  return JSON.parse(match[0]) as OcrResult;
+  return parseOcrJson(text);
 }

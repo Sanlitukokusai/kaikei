@@ -1,5 +1,4 @@
-import { ensureBalanced } from "@/app/actions/journal";
-import type { JournalLineInput } from "@/app/actions/journal";
+import { ensureBalanced, type JournalLineInput } from "@/lib/journal-validation";
 
 function dr(account_id: string, amount_jpy: number): JournalLineInput {
   return { side: "debit", account_id, amount_jpy };

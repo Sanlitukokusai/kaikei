@@ -1,4 +1,4 @@
-import { parseOcrJson } from "@/app/actions/ocr";
+import { parseOcrJson } from "@/lib/ocr-parser";
 
 const VALID_JSON = JSON.stringify({
   vendor_name: "テスト商店",
