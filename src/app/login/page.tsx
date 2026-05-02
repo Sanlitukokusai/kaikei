@@ -172,7 +172,7 @@ function LoginInner() {
         <form onSubmit={onVerifyOtp} style={{ padding: "64px 56px", display: "flex", flexDirection: "column", justifyContent: "center", background: "var(--zinc-50)" }}>
           <h2 style={{ fontSize: 22, margin: "0 0 6px", fontWeight: 700 }}>確認コードを入力</h2>
           <p style={{ color: "var(--foreground-500)", margin: "0 0 24px", fontSize: 13 }}>
-            <strong>{otpEmail}</strong> 宛に送信した6桁のコードを入力してください。
+            <strong>{otpEmail}</strong> 宛に送信した確認コードを入力してください。
           </p>
           {info && (
             <div className="alert" style={{ background: "#d1f1e0", color: "#0a6a3a", marginBottom: 14 }}>
@@ -185,20 +185,21 @@ function LoginInner() {
             </div>
           )}
           <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-            <Field label="確認コード（6桁）" required span={12}>
+            <Field label="確認コード" required span={12}>
               <Input
                 type="text"
                 inputMode="numeric"
                 pattern="[0-9]*"
-                maxLength={6}
-                placeholder="123456"
+                maxLength={10}
+                minLength={6}
+                placeholder="12345678"
                 value={otpCode}
                 onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, ""))}
                 required
                 style={{ letterSpacing: "0.4em", fontSize: 18, textAlign: "center" }}
               />
             </Field>
-            <Button variant="primary" size="lg" type="submit" disabled={isPending || otpCode.length !== 6}>
+            <Button variant="primary" size="lg" type="submit" disabled={isPending || otpCode.length < 6}>
               {isPending ? "確認中..." : "確認して登録完了"}
             </Button>
             <Button variant="bordered" type="button" onClick={onResendOtp} disabled={isPending}>
