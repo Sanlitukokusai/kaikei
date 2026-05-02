@@ -1,0 +1,26 @@
+<!doctype html><html lang="ja"><head><meta charset="utf-8"><link rel="stylesheet" href="../colors_and_type.css"><style>
+body{margin:0;padding:24px;background:var(--background);font-family:var(--font-sans)}
+.grid{display:grid;grid-template-columns:repeat(6,1fr);gap:14px}
+.cell{display:flex;flex-direction:column;align-items:center;gap:6px;padding:10px;border-radius:10px;background:var(--zinc-50)}
+.cell svg{stroke:var(--foreground-700);width:22px;height:22px;stroke-width:1.5;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.lbl{font-size:11px;color:var(--foreground-600);text-align:center}
+.note{font-size:11px;color:var(--foreground-500);margin-top:8px}
+</style></head><body>
+<div class="grid">
+  <div class="cell"><i data-lucide="layout-dashboard"></i><span class="lbl">ダッシュボード</span></div>
+  <div class="cell"><i data-lucide="book-open"></i><span class="lbl">仕訳</span></div>
+  <div class="cell"><i data-lucide="arrow-right-left"></i><span class="lbl">取引</span></div>
+  <div class="cell"><i data-lucide="file-text"></i><span class="lbl">請求書</span></div>
+  <div class="cell"><i data-lucide="scan-line"></i><span class="lbl">領収書OCR</span></div>
+  <div class="cell"><i data-lucide="landmark"></i><span class="lbl">銀行連携</span></div>
+  <div class="cell"><i data-lucide="receipt"></i><span class="lbl">インボイス</span></div>
+  <div class="cell"><i data-lucide="bar-chart-3"></i><span class="lbl">レポート</span></div>
+  <div class="cell"><i data-lucide="users"></i><span class="lbl">取引先</span></div>
+  <div class="cell"><i data-lucide="calendar"></i><span class="lbl">期間</span></div>
+  <div class="cell"><i data-lucide="settings"></i><span class="lbl">設定</span></div>
+  <div class="cell"><i data-lucide="bell"></i><span class="lbl">通知</span></div>
+</div>
+<div class="note">Lucide · 1.5 stroke · 22px (substitution flagged)</div>
+<script src="https://unpkg.com/lucide@latest"></script>
+<script>lucide.createIcons()</script>
+</body></html>

@@ -1,0 +1,24 @@
+<!doctype html><html lang="ja"><head><meta charset="utf-8"><link rel="stylesheet" href="../colors_and_type.css"><style>
+body{margin:0;padding:24px;background:var(--background);font-family:var(--font-sans)}
+.grid{display:grid;grid-template-columns:repeat(7,auto);gap:12px;align-items:center;justify-items:start}
+.lbl{font-size:11px;color:var(--foreground-500);font-weight:600;text-transform:uppercase;letter-spacing:.06em}
+.btn{display:inline-flex;align-items:center;justify-content:center;height:40px;padding:0 16px;border-radius:12px;font-size:14px;font-weight:500;border:0;cursor:pointer;transition:opacity .15s,transform .15s;white-space:nowrap}
+.btn:active{transform:scale(.97)}
+.btn.solid{background:var(--primary);color:#fff}
+.btn.bordered{background:transparent;border:2px solid var(--primary);color:var(--primary)}
+.btn.light{background:transparent;color:var(--primary)}
+.btn.flat{background:#cce3fd;color:#005bc4}
+.btn.faded{background:var(--zinc-100);border:2px solid var(--zinc-200);color:var(--primary)}
+.btn.shadow{background:var(--primary);color:#fff;box-shadow:0 5px 18px -4px rgba(0,111,238,.5)}
+.btn.ghost{background:transparent;border:2px solid var(--primary);color:var(--primary)}
+</style></head><body>
+<div class="grid">
+  <div class="lbl">Primary</div>
+  <button class="btn solid">保存する</button>
+  <button class="btn bordered">下書き</button>
+  <button class="btn light">キャンセル</button>
+  <button class="btn flat">複製</button>
+  <button class="btn faded">差戻す</button>
+  <button class="btn shadow">確定</button>
+</div>
+</body></html>

@@ -1,0 +1,17 @@
+<!doctype html><html lang="ja"><head><meta charset="utf-8"><link rel="stylesheet" href="../colors_and_type.css"><style>
+body{margin:0;padding:24px;background:#fafafa;font-family:var(--font-sans)}
+.row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+.card{background:#fff;border-radius:14px;padding:18px;box-shadow:var(--shadow-medium);display:flex;flex-direction:column;gap:8px}
+.eb{font-size:11px;color:var(--foreground-500);text-transform:uppercase;letter-spacing:.08em;font-weight:600}
+.val{font-family:var(--font-numeric);font-size:32px;font-weight:600;letter-spacing:-.01em;font-variant-numeric:tabular-nums}
+.delta{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:600}
+.delta.up{color:var(--money-positive)}
+.delta.down{color:var(--money-negative)}
+.sub{font-size:12px;color:var(--foreground-500)}
+</style></head><body>
+<div class="row">
+  <div class="card"><span class="eb">月間売上</span><span class="val">¥4,820,500</span><span class="delta up">▲ 12.4% <span class="sub" style="color:inherit;font-weight:400">前月比</span></span></div>
+  <div class="card"><span class="eb">月間費用</span><span class="val">¥1,284,360</span><span class="delta down">▼ 3.2% <span class="sub" style="color:inherit;font-weight:400">前月比</span></span></div>
+  <div class="card"><span class="eb">純利益</span><span class="val" style="color:var(--money-positive)">¥3,536,140</span><span class="sub">2026年4月（確定済）</span></div>
+</div>
+</body></html>

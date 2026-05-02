@@ -1,0 +1,19 @@
+<!doctype html><html lang="ja"><head><meta charset="utf-8"><link rel="stylesheet" href="../colors_and_type.css"><style>
+body{margin:0;padding:24px;background:var(--background);font-family:var(--font-sans)}
+.row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+.field{display:flex;flex-direction:column;gap:6px}
+.lbl{font-size:12px;color:var(--foreground-700);font-weight:500}
+.inp{height:40px;border-radius:12px;border:0;padding:0 14px;font-size:14px;background:var(--zinc-100);color:var(--foreground);font-family:inherit;outline:none}
+.inp.focus{background:var(--zinc-100);box-shadow:0 0 0 2px var(--primary)}
+.inp.err{box-shadow:0 0 0 2px var(--danger)}
+.hint{font-size:11px;color:var(--foreground-500)}
+.hint.err{color:var(--danger)}
+.suffix{position:absolute;right:14px;top:50%;transform:translateY(-50%);color:var(--foreground-500);font-size:14px}
+.wrap{position:relative}
+</style></head><body>
+<div class="row">
+  <div class="field"><label class="lbl">取引日</label><div class="wrap"><input class="inp" value="2026/05/03"></div><div class="hint">YYYY/MM/DD</div></div>
+  <div class="field"><label class="lbl">金額（円）</label><div class="wrap"><input class="inp focus" value="284,500"><span class="suffix">¥</span></div><div class="hint">フォーカス中</div></div>
+  <div class="field"><label class="lbl">勘定科目</label><div class="wrap"><input class="inp err" value=""></div><div class="hint err">必須項目です</div></div>
+</div>
+</body></html>

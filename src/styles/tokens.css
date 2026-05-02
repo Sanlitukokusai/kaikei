@@ -1,0 +1,283 @@
+/* ============================================================
+   Kaikei Cloud Design System — colors & type
+   Built on HeroUI v3 (light + dark) with Japanese accounting-SaaS tuning
+   ------------------------------------------------------------
+   Brand direction: "信頼 + データ重視" — a calm, professional cobalt
+   blue identity with Japanese typography (Noto Sans JP) for body
+   and Inter for numerics. Density tuned for accounting tables.
+   ============================================================ */
+
+/* --- Webfonts -------------------------------------------------- */
+@import url("https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;600;700&family=Noto+Sans+SC:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap");
+
+:root {
+  /* ============ HeroUI common color scales ============ */
+  /* Blue (primary) */
+  --blue-50:  #e6f1fe;
+  --blue-100: #cce3fd;
+  --blue-200: #99c7fb;
+  --blue-300: #66aaf9;
+  --blue-400: #338ef7;
+  --blue-500: #006FEE;
+  --blue-600: #005bc4;
+  --blue-700: #004493;
+  --blue-800: #002e62;
+  --blue-900: #001731;
+
+  /* Zinc (neutral / default) */
+  --zinc-50:  #fafafa;
+  --zinc-100: #f4f4f5;
+  --zinc-200: #e4e4e7;
+  --zinc-300: #d4d4d8;
+  --zinc-400: #a1a1aa;
+  --zinc-500: #71717a;
+  --zinc-600: #52525b;
+  --zinc-700: #3f3f46;
+  --zinc-800: #27272a;
+  --zinc-900: #18181b;
+
+  /* Green (success / 入金 / 売上 in JP accounting) */
+  --green-50:  #e8faf0;
+  --green-100: #d1f4e0;
+  --green-200: #a2e9c1;
+  --green-300: #74dfa2;
+  --green-400: #45d483;
+  --green-500: #17c964;
+  --green-600: #12a150;
+  --green-700: #0e793c;
+  --green-800: #095028;
+  --green-900: #052814;
+
+  /* Yellow (warning / 確認待ち) */
+  --yellow-50:  #fefce8;
+  --yellow-100: #fdedd3;
+  --yellow-200: #fbdba7;
+  --yellow-300: #f9c97c;
+  --yellow-400: #f7b750;
+  --yellow-500: #f5a524;
+  --yellow-600: #c4841d;
+  --yellow-700: #936316;
+  --yellow-800: #62420e;
+  --yellow-900: #312107;
+
+  /* Red (danger / 出金 / エラー) */
+  --red-50:  #fee7ef;
+  --red-100: #fdd0df;
+  --red-200: #faa0bf;
+  --red-300: #f871a0;
+  --red-400: #f54180;
+  --red-500: #f31260;
+  --red-600: #c20e4d;
+  --red-700: #920b3a;
+  --red-800: #610726;
+  --red-900: #310413;
+
+  /* Purple (secondary) */
+  --purple-500: #7828c8;
+  --purple-400: #9353d3;
+
+  /* Cyan (info accent) */
+  --cyan-500: #7EE7FC;
+  --cyan-700: #09AACD;
+
+  /* ============ Layout tokens (HeroUI v3 defaults) ============ */
+  --radius-small:  8px;
+  --radius-medium: 12px;
+  --radius-large:  14px;
+  --radius-full:   9999px;
+
+  --border-small:  1px;
+  --border-medium: 2px;
+  --border-large:  3px;
+
+  --shadow-small:  0px 0px 5px  0px rgb(0 0 0 / 0.02), 0px 2px 10px 0px rgb(0 0 0 / 0.06), 0px 0px 1px 0px rgb(0 0 0 / 0.3);
+  --shadow-medium: 0px 0px 15px 0px rgb(0 0 0 / 0.03), 0px 2px 30px 0px rgb(0 0 0 / 0.08), 0px 0px 1px 0px rgb(0 0 0 / 0.3);
+  --shadow-large:  0px 0px 30px 0px rgb(0 0 0 / 0.04), 0px 30px 60px 0px rgb(0 0 0 / 0.12), 0px 0px 1px 0px rgb(0 0 0 / 0.3);
+
+  --opacity-disabled: 0.5;
+  --opacity-hover:    0.8;
+
+  /* ============ Type sizes (HeroUI tiny/small/medium/large) ============ */
+  --fs-tiny:    0.75rem;   /* 12px – table dense, captions */
+  --fs-small:   0.875rem;  /* 14px – body small, table default */
+  --fs-medium:  1rem;      /* 16px – body */
+  --fs-large:   1.125rem;  /* 18px – section headers */
+  --lh-tiny:    1rem;
+  --lh-small:   1.25rem;
+  --lh-medium:  1.5rem;
+  --lh-large:   1.75rem;
+
+  /* Display scale extended for dashboards/marketing */
+  --fs-display-1: 3.5rem;   /* 56 — hero KPI numbers */
+  --fs-display-2: 2.5rem;   /* 40 — large KPI numbers  */
+  --fs-h1: 1.875rem;        /* 30 — page title         */
+  --fs-h2: 1.5rem;          /* 24 — card title         */
+  --fs-h3: 1.25rem;         /* 20 — subsection         */
+  --fs-h4: 1.125rem;        /* 18                      */
+
+  /* ============ Font families ============ */
+  /* Body/UI: Noto Sans JP (also covers Simplified Chinese fallback via Noto Sans SC) */
+  --font-sans:    "Noto Sans JP", "Noto Sans SC", "Hiragino Kaku Gothic ProN",
+                  "Hiragino Sans", "Yu Gothic UI", "Meiryo", system-ui,
+                  -apple-system, "Segoe UI", Roboto, sans-serif;
+  /* Latin/numeric: Inter for KPI numbers, statements, tabular figures */
+  --font-numeric: "Inter", var(--font-sans);
+  /* Mono: JetBrains Mono — receipt IDs, journal codes */
+  --font-mono:    "JetBrains Mono", "Menlo", "Consolas", monospace;
+
+  /* ============ Spacing scale (Tailwind compatible, accounting-density tuned) ============ */
+  --space-0: 0;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+
+  /* ============ Semantic — LIGHT (default) ============ */
+  --background: #FFFFFF;
+  --foreground: #11181C;
+  --foreground-50:  var(--zinc-50);
+  --foreground-100: var(--zinc-100);
+  --foreground-200: var(--zinc-200);
+  --foreground-300: var(--zinc-300);
+  --foreground-400: var(--zinc-400);
+  --foreground-500: var(--zinc-500);
+  --foreground-600: var(--zinc-600);
+  --foreground-700: var(--zinc-700);
+  --foreground-800: var(--zinc-800);
+  --foreground-900: var(--zinc-900);
+
+  --divider:  rgba(17, 17, 17, 0.15);
+  --overlay:  #000000;
+  --focus:    var(--blue-500);
+
+  /* HeroUI content surfaces — content1 = top of stack */
+  --content1: #FFFFFF;
+  --content1-foreground: #11181C;
+  --content2: var(--zinc-100);
+  --content2-foreground: var(--zinc-800);
+  --content3: var(--zinc-200);
+  --content3-foreground: var(--zinc-700);
+  --content4: var(--zinc-300);
+  --content4-foreground: var(--zinc-600);
+
+  /* Semantic role colors */
+  --default:    var(--zinc-300);
+  --default-foreground: #000;
+  --primary:    #2563EB; /* Yayoi-aligned trust blue */
+  --primary-foreground: #fff;
+  --primary-50:  #eff6ff;
+  --primary-100: #dbeafe;
+  --primary-500: #2563EB;
+  --primary-600: #1d4ed8;
+  --primary-700: #1e40af;
+  --secondary-info: #0EA5E9;
+  --info-indigo:    #6366F1;
+  --app-bg:         #F8FAFC;
+  --app-text:       #1E293B;
+  --secondary:  var(--purple-500);
+  --secondary-foreground: #fff;
+  --success:    var(--green-500);
+  --success-foreground: #000;
+  --warning:    var(--yellow-500);
+  --warning-foreground: #000;
+  --danger:     var(--red-500);
+  --danger-foreground: #fff;
+
+  /* Domain-specific tokens for accounting */
+  --money-positive: var(--green-600);   /* 入金・売上 (incoming)  */
+  --money-negative: var(--red-600);     /* 出金・費用 (outgoing)  */
+  --money-neutral:  var(--zinc-700);
+  --table-row-hover: var(--zinc-50);
+  --table-row-stripe: rgba(0, 0, 0, 0.015);
+  --table-border:   var(--zinc-200);
+  --tag-tax:        #fef3c7;            /* 税区分タグ淡色 */
+}
+
+/* ============ Semantic — DARK ============ */
+:root[data-theme="dark"], .dark {
+  --background: #000000;
+  --foreground: #ECEDEE;
+
+  --foreground-50:  var(--zinc-900);
+  --foreground-100: var(--zinc-800);
+  --foreground-200: var(--zinc-700);
+  --foreground-300: var(--zinc-600);
+  --foreground-400: var(--zinc-500);
+  --foreground-500: var(--zinc-400);
+  --foreground-600: var(--zinc-300);
+  --foreground-700: var(--zinc-200);
+  --foreground-800: var(--zinc-100);
+  --foreground-900: var(--zinc-50);
+
+  --divider: rgba(255, 255, 255, 0.15);
+
+  --content1: var(--zinc-900);
+  --content1-foreground: var(--zinc-50);
+  --content2: var(--zinc-800);
+  --content2-foreground: var(--zinc-100);
+  --content3: var(--zinc-700);
+  --content3-foreground: var(--zinc-200);
+  --content4: var(--zinc-600);
+  --content4-foreground: var(--zinc-300);
+
+  --default: var(--zinc-700);
+  --default-foreground: #fff;
+  --primary: var(--blue-500);
+  --primary-foreground: #fff;
+  --secondary: var(--purple-400);
+  --secondary-foreground: #fff;
+  --success: var(--green-500);
+  --success-foreground: #000;
+  --warning: var(--yellow-500);
+  --warning-foreground: #000;
+  --danger: var(--red-500);
+  --danger-foreground: #fff;
+
+  --money-positive: var(--green-400);
+  --money-negative: var(--red-400);
+  --money-neutral:  var(--zinc-300);
+  --table-row-hover: rgba(255,255,255,0.04);
+  --table-row-stripe: rgba(255,255,255,0.02);
+  --table-border: var(--zinc-800);
+
+  --shadow-small:  0px 0px 5px  0px rgb(0 0 0 / 0.05), 0px 2px 10px 0px rgb(0 0 0 / 0.2),  inset 0 0 1px 0 rgb(255 255 255 / 0.15);
+  --shadow-medium: 0px 0px 15px 0px rgb(0 0 0 / 0.06), 0px 2px 30px 0px rgb(0 0 0 / 0.22), inset 0 0 1px 0 rgb(255 255 255 / 0.15);
+  --shadow-large:  0px 0px 30px 0px rgb(0 0 0 / 0.07), 0px 30px 60px 0px rgb(0 0 0 / 0.26), inset 0 0 1px 0 rgb(255 255 255 / 0.15);
+}
+
+/* ============ Base element styles — semantic typography ============ */
+html { font-family: var(--font-sans); color: var(--foreground); background: var(--background); -webkit-font-smoothing: antialiased; }
+body { font-size: var(--fs-medium); line-height: var(--lh-medium); }
+
+h1, .h1 { font-size: var(--fs-h1);  font-weight: 700; line-height: 1.25; letter-spacing: -0.01em; }
+h2, .h2 { font-size: var(--fs-h2);  font-weight: 600; line-height: 1.3;  letter-spacing: -0.005em; }
+h3, .h3 { font-size: var(--fs-h3);  font-weight: 600; line-height: 1.35; }
+h4, .h4 { font-size: var(--fs-h4);  font-weight: 600; line-height: 1.4;  }
+.eyebrow { font-size: var(--fs-tiny); font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--foreground-500); }
+small, .small  { font-size: var(--fs-small);  line-height: var(--lh-small); }
+.tiny          { font-size: var(--fs-tiny);   line-height: var(--lh-tiny); }
+p { font-size: var(--fs-medium); line-height: var(--lh-medium); color: var(--foreground); }
+.muted { color: var(--foreground-500); }
+code, .code, kbd { font-family: var(--font-mono); font-size: 0.9em; }
+
+/* Numeric — financial figures use tabular numbers + Inter */
+.num, .money, td.num, .stat-value {
+  font-family: var(--font-numeric);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1, "lnum" 1;
+}
+.money.positive { color: var(--money-positive); }
+.money.negative { color: var(--money-negative); }
+
+/* Display sizes — for KPI numbers */
+.display-1 { font-family: var(--font-numeric); font-size: var(--fs-display-1); font-weight: 600; line-height: 1.05; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+.display-2 { font-family: var(--font-numeric); font-size: var(--fs-display-2); font-weight: 600; line-height: 1.1;  letter-spacing: -0.015em; font-variant-numeric: tabular-nums; }
+
+/* Focus ring — HeroUI style */
+:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; border-radius: 4px; }
