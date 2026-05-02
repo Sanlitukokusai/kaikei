@@ -3,14 +3,21 @@
 
 FROM node:22-alpine AS deps
 WORKDIR /app
+RUN apk add --no-cache libc6-compat
 COPY package.json package-lock.json* ./
-RUN npm ci --omit=dev=false
+# Install ALL deps (including dev) — needed for `next build` and TypeScript.
+# Skip Playwright browser download (only needed for E2E tests, not prod build).
+ENV PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1
+RUN npm ci --include=dev
 
 FROM node:22-alpine AS builder
 WORKDIR /app
+RUN apk add --no-cache libc6-compat
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
+ENV PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1
+# Placeholder env vars only at build-time. Real values come from Zeabur runtime env.
 ENV NEXT_PUBLIC_SUPABASE_URL=https://placeholder.supabase.co
 ENV NEXT_PUBLIC_SUPABASE_ANON_KEY=placeholder
 RUN npm run build
