@@ -1,0 +1,11 @@
+node_modules
+.next
+.git
+.env*.local
+e2e
+playwright-report
+test-results
+playwright/.cache
+src/__tests__
+coverage
+README.md
