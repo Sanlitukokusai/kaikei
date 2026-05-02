@@ -1,7 +1,8 @@
 import Icon from "@/components/Icon";
-import { Button, Card } from "@/components/ui";
+import { Card } from "@/components/ui";
 import { listBankTransactions, listAccounts } from "@/lib/queries";
 import BankRow from "./BankRow";
+import BankImportClient from "./BankImportClient";
 
 export const dynamic = "force-dynamic";
 
@@ -22,7 +23,7 @@ export default async function BankMatchPage() {
           </div>
         </div>
         <div className="row">
-          <Button variant="bordered" icon="RefreshCw">今すぐ同期</Button>
+          <BankImportClient />
         </div>
       </div>
 

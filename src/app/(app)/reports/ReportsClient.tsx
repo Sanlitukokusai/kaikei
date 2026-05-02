@@ -5,7 +5,7 @@ import Icon from "@/components/Icon";
 import { Button, Card } from "@/components/ui";
 import type { FinancialSummary, TrialBalanceLine } from "@/lib/queries";
 
-type Tab = "pl" | "bs" | "tb";
+type Tab = "pl" | "bs" | "tb" | "tax";
 
 const fmt = (n: number) => `¥${Math.abs(n).toLocaleString()}`;
 
@@ -196,6 +196,59 @@ const CATEGORY_LABEL: Record<string, string> = {
   asset: "資産", liability: "負債", equity: "純資産", revenue: "収益", expense: "費用",
 };
 
+function TaxTab({ taxSummary }: { taxSummary: Record<string, { base: number; tax: number }> }) {
+  const cats = Object.keys(taxSummary);
+  const totalBase = cats.reduce((s, c) => s + taxSummary[c].base, 0);
+  const totalTax = cats.reduce((s, c) => s + taxSummary[c].tax, 0);
+
+  const TAX_RATES: Record<string, number> = { "課税10%": 10, "課税8%": 8 };
+
+  return (
+    <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr", gap: 14 }}>
+      <Card title="消費税集計（税区分別）">
+        {cats.length === 0 ? (
+          <div style={{ textAlign: "center", padding: 40, color: "var(--foreground-500)" }}>
+            <Icon name="FileText" size={28} />
+            <div style={{ marginTop: 8 }}>この期間に消費税データがありません</div>
+          </div>
+        ) : (
+          <table className="tbl">
+            <thead>
+              <tr>
+                <th>税区分</th>
+                <th className="num">課税標準額（基礎）</th>
+                <th className="num">消費税額</th>
+                <th className="num">税率</th>
+              </tr>
+            </thead>
+            <tbody>
+              {cats.map((cat) => (
+                <tr key={cat}>
+                  <td>{cat}</td>
+                  <td className="num">¥{taxSummary[cat].base.toLocaleString()}</td>
+                  <td className="num">¥{taxSummary[cat].tax.toLocaleString()}</td>
+                  <td className="num">{TAX_RATES[cat] != null ? `${TAX_RATES[cat]}%` : "—"}</td>
+                </tr>
+              ))}
+              <tr style={{ background: "#eff6ff", fontWeight: 700 }}>
+                <td>合計</td>
+                <td className="num">¥{totalBase.toLocaleString()}</td>
+                <td className="num">¥{totalTax.toLocaleString()}</td>
+                <td />
+              </tr>
+            </tbody>
+          </table>
+        )}
+      </Card>
+      <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+        <KpiCard label="課税10%消費税" value={`¥${(taxSummary["課税10%"]?.tax ?? 0).toLocaleString()}`} color="#2563EB" />
+        <KpiCard label="課税8%消費税" value={`¥${(taxSummary["課税8%"]?.tax ?? 0).toLocaleString()}`} color="#7c3aed" />
+        <KpiCard label="消費税合計" value={`¥${totalTax.toLocaleString()}`} color="#16a34a" sub={`課税標準 ¥${totalBase.toLocaleString()}`} />
+      </div>
+    </div>
+  );
+}
+
 function KpiCard({ label, value, color, sub }: { label: string; value: string; color: string; sub?: string }) {
   return (
     <div className="kpi">
@@ -207,12 +260,13 @@ function KpiCard({ label, value, color, sub }: { label: string; value: string; c
 }
 
 export default function ReportsClient({
-  fs, tb, dateFrom, dateTo,
+  fs, tb, dateFrom, dateTo, taxSummary,
 }: {
   fs: FinancialSummary;
   tb: TrialBalanceLine[];
   dateFrom: string;
   dateTo: string;
+  taxSummary: Record<string, { base: number; tax: number }>;
 }) {
   const [tab, setTab] = useState<Tab>("pl");
 
@@ -229,18 +283,29 @@ export default function ReportsClient({
           </div>
         </div>
         <div className="row">
+          <Link href={`/reports?from=${prevYear(dateFrom)}&to=${prevYearEnd(dateTo)}`}>
+            <Button variant="bordered" size="sm">前期</Button>
+          </Link>
           <Link href={`/reports?from=${prevMonth(dateFrom)}&to=${prevMonthEnd(dateTo)}`}>
             <Button variant="bordered" icon="ChevronLeft" size="sm" />
           </Link>
           <Link href={`/reports?from=${nextMonth(dateFrom)}&to=${nextMonthEnd(dateTo)}`}>
             <Button variant="bordered" icon="ChevronRight" size="sm" />
           </Link>
-          <Button variant="bordered" icon="Download">エクスポート</Button>
+          <Link href={`/reports?from=${nextYear(dateFrom)}&to=${nextYearEnd(dateTo)}`}>
+            <Button variant="bordered" size="sm">翌期</Button>
+          </Link>
+          <a href={`/api/export/trial-balance?from=${dateFrom}&to=${dateTo}`} download>
+            <Button variant="bordered" icon="Download">試算表CSV</Button>
+          </a>
+          <a href={`/api/export/journal?from=${dateFrom}&to=${dateTo}`} download>
+            <Button variant="bordered" icon="Download">仕訳帳CSV</Button>
+          </a>
         </div>
       </div>
 
       <div style={{ display: "flex", gap: 4, borderBottom: "1px solid var(--zinc-200)", marginBottom: 18 }}>
-        {([["pl", "損益計算書 (P/L)"], ["bs", "貸借対照表 (B/S)"], ["tb", "試算表"]] as [Tab, string][]).map(([key, label]) => (
+        {([["pl", "損益計算書 (P/L)"], ["bs", "貸借対照表 (B/S)"], ["tb", "試算表"], ["tax", "消費税申告"]] as [Tab, string][]).map(([key, label]) => (
           <button
             key={key}
             onClick={() => setTab(key)}
@@ -259,6 +324,7 @@ export default function ReportsClient({
       {tab === "pl" && <PLTab fs={fs} />}
       {tab === "bs" && <BSTab fs={fs} />}
       {tab === "tb" && <TBTab tb={tb} />}
+      {tab === "tax" && <TaxTab taxSummary={taxSummary} />}
     </div>
   );
 }
@@ -269,7 +335,7 @@ export function prevMonth(from: string) {
   return d.toISOString().slice(0, 7) + "-01";
 }
 export function prevMonthEnd(to: string) {
-  const d = new Date(to); d.setDate(0); // last day of prev month
+  const d = new Date(to); d.setDate(0);
   return d.toISOString().slice(0, 10);
 }
 export function nextMonth(from: string) {
@@ -278,5 +344,21 @@ export function nextMonth(from: string) {
 }
 export function nextMonthEnd(to: string) {
   const d = new Date(to); d.setMonth(d.getMonth() + 2, 0);
+  return d.toISOString().slice(0, 10);
+}
+export function prevYear(from: string) {
+  const d = new Date(from); d.setFullYear(d.getFullYear() - 1);
+  return d.toISOString().slice(0, 10);
+}
+export function prevYearEnd(to: string) {
+  const d = new Date(to); d.setFullYear(d.getFullYear() - 1);
+  return d.toISOString().slice(0, 10);
+}
+export function nextYear(from: string) {
+  const d = new Date(from); d.setFullYear(d.getFullYear() + 1);
+  return d.toISOString().slice(0, 10);
+}
+export function nextYearEnd(to: string) {
+  const d = new Date(to); d.setFullYear(d.getFullYear() + 1);
   return d.toISOString().slice(0, 10);
 }

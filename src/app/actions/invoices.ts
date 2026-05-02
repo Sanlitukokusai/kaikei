@@ -89,6 +89,50 @@ export async function updateInvoiceStatus(
   revalidatePath("/invoices");
 }
 
+export async function updateInvoice(id: string, input: CreateInvoiceInput) {
+  const sb = await actionClient();
+  const { data: user } = await sb.auth.getUser();
+  if (!user.user) throw new Error("Not authenticated");
+
+  const { subtotal, tax_total, total } = totals(input.items);
+
+  const { error } = await sb
+    .from("invoices")
+    .update({
+      invoice_no: input.invoice_no,
+      invoice_date: input.invoice_date,
+      due_date: input.due_date || null,
+      partner_id: input.partner_id || null,
+      subject: input.subject || null,
+      notes: input.notes || null,
+      subtotal, tax_total, total,
+    })
+    .eq("id", id);
+  if (error) throw new Error(error.message);
+
+  const { error: delErr } = await sb.from("invoice_items").delete().eq("invoice_id", id);
+  if (delErr) throw new Error(delErr.message);
+
+  if (input.items.length) {
+    const items = input.items.map((it, i) => ({
+      invoice_id: id,
+      line_no: i + 1,
+      item_name: it.item_name || null,
+      transaction_date: it.transaction_date || null,
+      quantity: it.quantity ?? null,
+      unit: it.unit || null,
+      unit_price: it.unit_price ?? null,
+      tax_rate: it.tax_rate ?? 10,
+      amount: Math.round((it.quantity ?? 0) * (it.unit_price ?? 0)),
+    }));
+    const { error: insErr } = await sb.from("invoice_items").insert(items);
+    if (insErr) throw new Error(insErr.message);
+  }
+
+  revalidatePath("/invoices");
+  redirect("/invoices");
+}
+
 export async function deleteInvoice(id: string) {
   const sb = await actionClient();
   // Items deleted by ON DELETE CASCADE

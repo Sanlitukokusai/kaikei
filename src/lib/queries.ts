@@ -1,5 +1,5 @@
 import { DEMO_COMPANY_ID, serverClient } from "./supabase";
-import type { Account, BankTransaction, Invoice, JournalEntry, JournalLine, Partner } from "./database.types";
+import type { Account, BankTransaction, Invoice, InvoiceItem, JournalEntry, JournalLine, Partner } from "./database.types";
 
 export async function listPartners(companyId: string = DEMO_COMPANY_ID): Promise<Partner[]> {
   const sb = await serverClient();
@@ -265,4 +265,107 @@ export async function listVouchers(companyId: string = DEMO_COMPANY_ID) {
     .order("uploaded_at", { ascending: false });
   if (error) throw error;
   return data ?? [];
+}
+
+export type InvoiceWithItems = Invoice & {
+  partner: Partner | null;
+  items: InvoiceItem[];
+};
+
+export async function getInvoice(
+  id: string,
+  companyId: string = DEMO_COMPANY_ID,
+): Promise<InvoiceWithItems | null> {
+  const sb = await serverClient();
+  const { data, error } = await sb
+    .from("invoices")
+    .select("*, partner:partners(*), items:invoice_items(*)")
+    .eq("id", id)
+    .eq("company_id", companyId)
+    .order("line_no", { ascending: true, referencedTable: "invoice_items" })
+    .single();
+  if (error) return null;
+  return data as InvoiceWithItems;
+}
+
+export async function listOverdueInvoices(
+  companyId: string = DEMO_COMPANY_ID,
+): Promise<Array<Invoice & { partner: Partner | null }>> {
+  const today = new Date().toISOString().slice(0, 10);
+  const sb = await serverClient();
+  const { data, error } = await sb
+    .from("invoices")
+    .select("*, partner:partners(*)")
+    .eq("company_id", companyId)
+    .neq("payment_status", "paid")
+    .lt("due_date", today)
+    .not("due_date", "is", null)
+    .order("due_date", { ascending: true });
+  if (error) throw error;
+  return (data ?? []) as Array<Invoice & { partner: Partner | null }>;
+}
+
+export async function listJournalEntriesForExport(
+  companyId: string = DEMO_COMPANY_ID,
+  dateFrom: string,
+  dateTo: string,
+) {
+  const sb = await serverClient();
+  const { data, error } = await sb
+    .from("journal_entries")
+    .select(
+      `id, entry_date, voucher_no, description, status,
+       lines:journal_lines(
+         line_no, side, amount_jpy, memo,
+         account:accounts(code, name),
+         partner:partners(name)
+       )`
+    )
+    .eq("company_id", companyId)
+    .gte("entry_date", dateFrom)
+    .lte("entry_date", dateTo)
+    .order("entry_date", { ascending: true })
+    .order("created_at", { ascending: true });
+  if (error) throw error;
+  return (data ?? []) as unknown as Array<{
+    id: string; entry_date: string; voucher_no: string | null;
+    description: string | null; status: string;
+    lines: Array<{
+      line_no: number; side: string; amount_jpy: number; memo: string | null;
+      account: { code: string; name: string } | null;
+      partner: { name: string } | null;
+    }>;
+  }>;
+}
+
+export async function getTaxSummary(
+  companyId: string = DEMO_COMPANY_ID,
+  dateFrom: string,
+  dateTo: string,
+) {
+  const sb = await serverClient();
+  const { data, error } = await sb
+    .from("journal_entries")
+    .select(
+      `lines:journal_lines(side, amount_jpy, tax_category, tax_amount_jpy)`
+    )
+    .eq("company_id", companyId)
+    .eq("status", "confirmed")
+    .gte("entry_date", dateFrom)
+    .lte("entry_date", dateTo);
+  if (error) throw error;
+
+  const summary: Record<string, { base: number; tax: number }> = {};
+  for (const entry of data ?? []) {
+    for (const line of (entry.lines as Array<{
+      side: string; amount_jpy: number;
+      tax_category: string | null; tax_amount_jpy: number | null;
+    }>)) {
+      const cat = line.tax_category ?? "不明";
+      if (!summary[cat]) summary[cat] = { base: 0, tax: 0 };
+      summary[cat].base += line.amount_jpy;
+      summary[cat].tax += line.tax_amount_jpy ?? 0;
+    }
+  }
+  return summary;
 }

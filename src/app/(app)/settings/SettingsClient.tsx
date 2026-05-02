@@ -158,6 +158,25 @@ export default function SettingsClient({ company }: { company: Company }) {
             </div>
           </div>
         </Card>
+
+        <Card title="ユーザー管理・権限">
+          <div style={{ padding: "8px 0" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 12, padding: "10px 0", borderBottom: "1px solid var(--zinc-100)" }}>
+              <div style={{ width: 36, height: 36, borderRadius: "50%", background: "#eff6ff", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                <Icon name="User" size={16} style={{ color: "#2563EB" }} />
+              </div>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontWeight: 500, fontSize: 14 }}>管理者</div>
+                <div style={{ fontSize: 12, color: "var(--foreground-500)" }}>{company.email ?? "—"}</div>
+              </div>
+              <span style={{ fontSize: 11, background: "#eff6ff", color: "#1d4ed8", borderRadius: 6, padding: "2px 8px" }}>管理者</span>
+            </div>
+            <div style={{ marginTop: 14, padding: "12px", background: "var(--zinc-50)", borderRadius: 8, fontSize: 13, color: "var(--foreground-500)" }}>
+              <Icon name="Lock" size={13} style={{ marginRight: 6 }} />
+              マルチユーザー機能（招待・権限管理）はビジネスプランで利用可能です。
+            </div>
+          </div>
+        </Card>
       </div>
     </div>
   );

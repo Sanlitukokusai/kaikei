@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Icon from "@/components/Icon";
 import { Button, Card, Chip } from "@/components/ui";
-import { listJournalEntries } from "@/lib/queries";
+import { listJournalEntries, listOverdueInvoices } from "@/lib/queries";
 import type { JournalEntry } from "@/lib/database.types";
 
 export const dynamic = "force-dynamic";
@@ -15,7 +15,10 @@ const statusLabel: Record<JournalEntry["status"], string> = {
 const fmtMD = (d: string) => d.slice(5).replaceAll("-", "/");
 
 export default async function DashboardPage() {
-  const recent = (await listJournalEntries(undefined, 5)).slice(0, 5);
+  const [recent, overdueInvoices] = await Promise.all([
+    listJournalEntries(undefined, 5).then((r) => r.slice(0, 5)),
+    listOverdueInvoices(),
+  ]);
 
   const months = ["11月", "12月", "1月", "2月", "3月", "4月"];
   const sales = [3.2, 3.8, 3.5, 4.1, 4.6, 4.82];
@@ -49,13 +52,20 @@ export default async function DashboardPage() {
         </div>
       </div>
 
-      <div className="alert">
-        <Icon name="AlertCircle" size={18} />
-        <div style={{ flex: 1 }}>
-          <strong>3件の取引</strong>が銀行連携から取込まれました。勘定科目の確認をお願いします。
+      {overdueInvoices.length > 0 && (
+        <div className="alert" style={{ borderColor: "var(--money-negative)", background: "#fef2f2" }}>
+          <Icon name="AlertTriangle" size={18} style={{ color: "var(--money-negative)" }} />
+          <div style={{ flex: 1 }}>
+            <strong>{overdueInvoices.length}件の請求書</strong>が期限超過です。
+            {overdueInvoices.slice(0, 3).map((inv) => (
+              <span key={inv.id} style={{ marginLeft: 8, fontSize: 12, color: "var(--foreground-600)" }}>
+                {inv.partner?.name ?? "—"} ¥{inv.total.toLocaleString()} ({inv.due_date})
+              </span>
+            ))}
+          </div>
+          <Link href="/invoices"><Button variant="bordered" size="sm">確認する</Button></Link>
         </div>
-        <Link href="/bank"><Button variant="bordered" size="sm">確認する</Button></Link>
-      </div>
+      )}
 
       <div className="kpi-grid" style={{ marginBottom: 18 }}>
         <div className="kpi"><div className="eb">月間売上</div><div className="val">¥4,820,500</div><div className="delta up"><Icon name="TrendingUp" size={14} />+12.4% <span className="sub">前月比</span></div></div>
