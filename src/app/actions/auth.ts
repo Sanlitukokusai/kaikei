@@ -11,17 +11,56 @@ export async function signInWithPassword(email: string, password: string) {
   redirect("/");
 }
 
-export async function signUpWithPassword(email: string, password: string, companyName?: string) {
+export type SignUpResult =
+  | { error: string }
+  | { needsVerification: true; email: string }
+  | undefined;
+
+export async function signUpWithPassword(
+  email: string,
+  password: string,
+  companyName?: string,
+): Promise<SignUpResult> {
   const sb = await actionClient();
-  const { error } = await sb.auth.signUp({
+  const { data, error } = await sb.auth.signUp({
     email,
     password,
     options: { data: companyName ? { company_name: companyName } : {} },
   });
-  if (error) return { error: error.message };
-  // If email confirmations are disabled, the user is auto-signed-in.
+  if (error) {
+    const msg = error.message.toLowerCase();
+    if (msg.includes("already") || msg.includes("registered") || msg.includes("exists")) {
+      return { error: "このメールアドレスは既に登録されています。ログインタブからサインインしてください。" };
+    }
+    return { error: error.message };
+  }
+  // Supabase obfuscates "user already exists" by returning a user with empty
+  // identities array (anti-enumeration). Detect it explicitly.
+  if (data.user && Array.isArray(data.user.identities) && data.user.identities.length === 0) {
+    return { error: "このメールアドレスは既に登録されています。ログインタブからサインインしてください。" };
+  }
+  // No session = email confirmation required → ask for OTP code.
+  if (data.user && !data.session) {
+    return { needsVerification: true, email };
+  }
+  // Auto-signed-in (when Supabase email confirmation is disabled).
   revalidatePath("/", "layout");
   redirect("/");
+}
+
+export async function verifySignupOtp(email: string, token: string) {
+  const sb = await actionClient();
+  const { error } = await sb.auth.verifyOtp({ email, token, type: "signup" });
+  if (error) return { error: error.message };
+  revalidatePath("/", "layout");
+  redirect("/");
+}
+
+export async function resendSignupOtp(email: string) {
+  const sb = await actionClient();
+  const { error } = await sb.auth.resend({ type: "signup", email });
+  if (error) return { error: error.message };
+  return { ok: true as const };
 }
 
 export async function signOut() {
