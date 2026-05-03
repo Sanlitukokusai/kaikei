@@ -119,7 +119,7 @@ function LoginInner() {
             <div style={{ display: "flex", alignItems: "center", gap: 6 }}><Icon name="Lock" size={14} />通信は TLS 1.3 で暗号化</div>
           </div>
         </div>
-        <div style={{ fontSize: 11, color: "var(--foreground-500)" }}>© 2026 Kaikei Cloud, Inc. · プライバシー · 利用規約</div>
+        <div style={{ fontSize: 11, color: "var(--foreground-500)" }}>© {new Date().getFullYear()} Kaikei Cloud, Inc. · プライバシー · 利用規約</div>
       </div>
       {stage === "form" ? (
         <form onSubmit={onSubmit} style={{ padding: "64px 56px", display: "flex", flexDirection: "column", justifyContent: "center", background: "var(--zinc-50)" }}>

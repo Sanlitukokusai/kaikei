@@ -1,14 +1,34 @@
 import Icon from "@/components/Icon";
 import { Card } from "@/components/ui";
-import { listBankTransactions, listAccounts } from "@/lib/queries";
+import { listBankTransactions, listAccounts, listBankAccounts } from "@/lib/queries";
 import BankRow from "./BankRow";
 import BankImportClient from "./BankImportClient";
 
 export const dynamic = "force-dynamic";
 
+const accountTypeLabel: Record<string, string> = {
+  checking: "普通",
+  savings: "貯蓄",
+  current: "当座",
+};
+
 export default async function BankMatchPage() {
-  const [txns, accounts] = await Promise.all([listBankTransactions(), listAccounts()]);
+  const [txns, accounts, bankAccounts] = await Promise.all([
+    listBankTransactions(),
+    listAccounts(),
+    listBankAccounts(),
+  ]);
   const pending = txns.filter((t) => t.match_status === "pending");
+  const primary = bankAccounts.find((b) => b.is_default) ?? bankAccounts[0] ?? null;
+  const headerLine = primary
+    ? [
+        primary.bank_name,
+        primary.branch_name,
+        primary.account_type
+          ? `${accountTypeLabel[primary.account_type] ?? primary.account_type}${primary.account_number ? ` ${primary.account_number}` : ""}`
+          : null,
+      ].filter(Boolean).join(" / ")
+    : "銀行口座が未登録";
 
   return (
     <div>
@@ -19,7 +39,7 @@ export default async function BankMatchPage() {
           </div>
           <h1 className="h1">銀行連携・取引マッチング</h1>
           <div className="muted" style={{ fontSize: 13, marginTop: 4 }}>
-            三菱UFJ銀行 渋谷支店 / 普通 1234567 · 取込済 {txns.length}件 · 未処理 {pending.length}件
+            {headerLine} · 取込済 {txns.length}件 · 未処理 {pending.length}件
           </div>
         </div>
         <div className="row">

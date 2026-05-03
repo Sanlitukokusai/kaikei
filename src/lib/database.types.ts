@@ -93,6 +93,18 @@ export type InvoiceItem = {
   amount: number;
 };
 
+export type BankAccount = {
+  id: string;
+  company_id: string;
+  bank_name: string;
+  branch_name: string | null;
+  account_type: string | null;
+  account_number: string | null;
+  account_holder_kana: string | null;
+  is_default: boolean;
+  created_at: string;
+};
+
 export type JournalEntry = {
   id: string;
   company_id: string;

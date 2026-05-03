@@ -1,5 +1,19 @@
 import { DEMO_COMPANY_ID, serverClient } from "./supabase";
-import type { Account, BankTransaction, Company, Invoice, InvoiceItem, JournalEntry, JournalLine, Partner } from "./database.types";
+import type { Account, BankAccount, BankTransaction, Company, Invoice, InvoiceItem, JournalEntry, JournalLine, Partner } from "./database.types";
+
+export async function listBankAccounts(
+  companyId: string = DEMO_COMPANY_ID,
+): Promise<BankAccount[]> {
+  const sb = await serverClient();
+  const { data, error } = await sb
+    .from("bank_accounts")
+    .select("*")
+    .eq("company_id", companyId)
+    .order("is_default", { ascending: false })
+    .order("created_at", { ascending: true });
+  if (error) throw error;
+  return (data ?? []) as BankAccount[];
+}
 
 export async function getCompany(
   companyId: string = DEMO_COMPANY_ID,

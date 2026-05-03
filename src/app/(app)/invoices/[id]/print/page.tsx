@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { getInvoice } from "@/lib/queries";
+import { getCompany, getInvoice } from "@/lib/queries";
 import PrintButton from "./PrintButton";
 
 export const dynamic = "force-dynamic";
@@ -9,7 +9,7 @@ const fmtDate = (d: string | null) => d ? d.replaceAll("-", "/") : "—";
 
 export default async function InvoicePrintPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const invoice = await getInvoice(id);
+  const [invoice, company] = await Promise.all([getInvoice(id), getCompany()]);
   if (!invoice) notFound();
 
   const tax10Items = invoice.items.filter((it) => it.tax_rate === 10);
@@ -72,7 +72,9 @@ export default async function InvoicePrintPage({ params }: { params: Promise<{ i
             </div>
           </div>
           <div className="from-block">
-            <div className="co">三立国際合同会社</div>
+            <div className="co">{company?.name ?? "—"}</div>
+            {company?.invoice_reg_no && <div>登録番号：{company.invoice_reg_no}</div>}
+            {company?.address && <div>{company.address}</div>}
             <div>請求日：{fmtDate(invoice.invoice_date)}</div>
             <div>請求書番号：{invoice.invoice_no}</div>
           </div>

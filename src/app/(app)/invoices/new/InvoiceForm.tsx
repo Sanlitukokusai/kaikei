@@ -10,7 +10,15 @@ type LineRow = InvoiceLineInput & { _key: string };
 
 const newRow = (): LineRow => ({ _key: Math.random().toString(36).slice(2), tax_rate: 10, quantity: 0, unit_price: 0, unit: "個" });
 
-export default function InvoiceForm({ partners }: { partners: Partner[] }) {
+export default function InvoiceForm({
+  partners,
+  defaultCompanyName = "",
+  defaultRegNo = "",
+}: {
+  partners: Partner[];
+  defaultCompanyName?: string;
+  defaultRegNo?: string;
+}) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [tab, setTab] = useState<"info" | "tax">("info");
@@ -24,8 +32,8 @@ export default function InvoiceForm({ partners }: { partners: Partner[] }) {
   const [dueDate, setDueDate] = useState<string>("");
   const [subject, setSubject] = useState<string>("");
   const [notes, setNotes] = useState<string>("");
-  const [companyName, setCompanyName] = useState<string>("三立国際合同会社");
-  const [regNo, setRegNo] = useState<string>("");
+  const [companyName, setCompanyName] = useState<string>(defaultCompanyName);
+  const [regNo, setRegNo] = useState<string>(defaultRegNo);
   const [rows, setRows] = useState<LineRow[]>(() => Array.from({ length: 5 }, newRow));
 
   const updateRow = (i: number, patch: Partial<LineRow>) =>
