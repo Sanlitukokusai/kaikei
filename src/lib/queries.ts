@@ -1,5 +1,13 @@
 import { DEMO_COMPANY_ID, serverClient } from "./supabase";
-import type { Account, BankTransaction, Invoice, InvoiceItem, JournalEntry, JournalLine, Partner } from "./database.types";
+import type { Account, BankTransaction, Company, Invoice, InvoiceItem, JournalEntry, JournalLine, Partner } from "./database.types";
+
+export async function getCompany(
+  companyId: string = DEMO_COMPANY_ID,
+): Promise<Company | null> {
+  const sb = await serverClient();
+  const { data } = await sb.from("companies").select("*").eq("id", companyId).single();
+  return (data as Company) ?? null;
+}
 
 export async function listPartners(companyId: string = DEMO_COMPANY_ID): Promise<Partner[]> {
   const sb = await serverClient();
@@ -336,6 +344,129 @@ export async function listJournalEntriesForExport(
       partner: { name: string } | null;
     }>;
   }>;
+}
+
+// ── Dashboard summary ─────────────────────────────────────────────────────
+
+export type DashboardSummary = {
+  period: { year: number; month: number };
+  revenue: number;
+  expense: number;
+  netIncome: number;
+  revenueDeltaPct: number | null;
+  expenseDeltaPct: number | null;
+  netIncomeDeltaPct: number | null;
+  cashBalance: number;
+  cashAccountCount: number;
+  trend: Array<{ label: string; revenue: number; prevYearRevenue: number }>;
+  breakdown: Array<{ name: string; amt: number; pct: number; color: string }>;
+};
+
+const ymd = (d: Date) => d.toISOString().slice(0, 10);
+const monthStartStr = (y: number, m0: number) => ymd(new Date(Date.UTC(y, m0, 1)));
+const monthEndStr = (y: number, m0: number) => ymd(new Date(Date.UTC(y, m0 + 1, 0)));
+
+export async function getDashboardSummary(
+  companyId: string = DEMO_COMPANY_ID,
+  refDate: Date = new Date(),
+): Promise<DashboardSummary> {
+  const year = refDate.getUTCFullYear();
+  const month0 = refDate.getUTCMonth();
+
+  const currStart = monthStartStr(year, month0);
+  const currEnd = monthEndStr(year, month0);
+  const prevYr = month0 === 0 ? year - 1 : year;
+  const prevMo = month0 === 0 ? 11 : month0 - 1;
+
+  const sumRevenue = (tb: TrialBalanceLine[]) =>
+    tb.filter((r) => r.category === "revenue").reduce((s, r) => s + r.balance, 0);
+  const sumExpense = (tb: TrialBalanceLine[]) =>
+    tb.filter((r) => r.category === "expense").reduce((s, r) => s + r.balance, 0);
+
+  const trendTbs = await Promise.all(
+    Array.from({ length: 6 }, (_, i) => {
+      const idx = 5 - i;
+      const t = new Date(Date.UTC(year, month0 - idx, 1));
+      const ty = t.getUTCFullYear();
+      const tm = t.getUTCMonth();
+      return Promise.all([
+        getTrialBalance(companyId, monthStartStr(ty, tm), monthEndStr(ty, tm)),
+        getTrialBalance(companyId, monthStartStr(ty - 1, tm), monthEndStr(ty - 1, tm)),
+      ]).then(([tb, prevYrTb]) => ({
+        label: `${tm + 1}月`,
+        ty,
+        tm,
+        tb,
+        prevYrRevenue: sumRevenue(prevYrTb),
+      }));
+    }),
+  );
+
+  const currTb = trendTbs[5].tb;
+  const prevTb = await getTrialBalance(
+    companyId,
+    monthStartStr(prevYr, prevMo),
+    monthEndStr(prevYr, prevMo),
+  );
+
+  const allTimeTb = await getTrialBalance(companyId, "1900-01-01", currEnd);
+  const cashAccounts = allTimeTb.filter(
+    (r) => r.category === "asset" && (r.code.startsWith("111") || r.code.startsWith("112")),
+  );
+  const cashBalance = cashAccounts.reduce((s, r) => s + r.balance, 0);
+
+  const revenue = sumRevenue(currTb);
+  const expense = sumExpense(currTb);
+  const prevRevenue = sumRevenue(prevTb);
+  const prevExpense = sumExpense(prevTb);
+  const netIncome = revenue - expense;
+  const prevNet = prevRevenue - prevExpense;
+
+  const pct = (curr: number, prev: number) =>
+    prev === 0 ? null : ((curr - prev) / Math.abs(prev)) * 100;
+
+  const colors = ["#006FEE", "#338ef7", "#7EE7FC", "#7828c8", "#f5a524"];
+  const expenseRows = currTb
+    .filter((r) => r.category === "expense" && r.balance > 0)
+    .sort((a, b) => b.balance - a.balance);
+  const top4 = expenseRows.slice(0, 4);
+  const others = expenseRows.slice(4);
+  const othersTotal = others.reduce((s, r) => s + r.balance, 0);
+  const totalForPct = expense || 1;
+  const breakdown: DashboardSummary["breakdown"] = [
+    ...top4.map((r, i) => ({
+      name: r.name,
+      amt: r.balance,
+      pct: Math.round((r.balance / totalForPct) * 100),
+      color: colors[i],
+    })),
+  ];
+  if (others.length > 0) {
+    breakdown.push({
+      name: "その他",
+      amt: othersTotal,
+      pct: Math.round((othersTotal / totalForPct) * 100),
+      color: "var(--zinc-300)",
+    });
+  }
+
+  return {
+    period: { year, month: month0 + 1 },
+    revenue,
+    expense,
+    netIncome,
+    revenueDeltaPct: pct(revenue, prevRevenue),
+    expenseDeltaPct: pct(expense, prevExpense),
+    netIncomeDeltaPct: pct(netIncome, prevNet),
+    cashBalance,
+    cashAccountCount: cashAccounts.length,
+    trend: trendTbs.map((t) => ({
+      label: t.label,
+      revenue: sumRevenue(t.tb),
+      prevYearRevenue: t.prevYrRevenue,
+    })),
+    breakdown,
+  };
 }
 
 export async function getTaxSummary(

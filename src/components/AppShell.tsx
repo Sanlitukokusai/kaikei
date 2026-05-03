@@ -1,10 +1,10 @@
-import Link from "next/link";
 import { type ReactNode } from "react";
 import Icon from "./Icon";
 import UserMenu from "./UserMenu";
 import SidebarNav from "./SidebarNav";
 import { type icons } from "lucide-react";
 import { serverClient } from "@/lib/supabase";
+import { getCompany } from "@/lib/queries";
 
 type IconName = keyof typeof icons | "Home" | "BarChart3" | "Edit3";
 export type NavItem = { id: string; href: string; label: string; icon: IconName; chevron?: boolean };
@@ -32,10 +32,16 @@ async function Topbar() {
   const sb = await serverClient();
   const { data } = await sb.auth.getUser();
   const email = data.user?.email ?? "";
+  const userMetaCompany = (data.user?.user_metadata as { company_name?: string } | undefined)?.company_name;
+  let orgName = userMetaCompany;
+  if (!orgName) {
+    const company = await getCompany().catch(() => null);
+    orgName = company?.name ?? "";
+  }
   return (
     <header className="topbar yc-topbar">
       <div style={{ flex: 1 }} />
-      <div className="yc-topbar-org">三立国際合同会社</div>
+      {orgName ? <div className="yc-topbar-org">{orgName}</div> : null}
       <div className="tb-icon"><Icon name="HelpCircle" size={18} /></div>
       <div className="tb-icon"><Icon name="Bell" size={18} /></div>
       {email ? <UserMenu email={email} /> : null}
