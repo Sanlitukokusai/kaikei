@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { middlewareClient } from "@/lib/supabase";
 
-const PUBLIC_PATHS = ["/login", "/auth/callback"];
+const PUBLIC_PATHS = ["/login", "/auth/callback", "/auth/reset-password"];
 
 export async function middleware(req: NextRequest) {
   const res = NextResponse.next({ request: req });

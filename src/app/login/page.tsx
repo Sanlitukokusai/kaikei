@@ -4,7 +4,7 @@ import { useSearchParams } from "next/navigation";
 import Icon from "@/components/Icon";
 import { Button, Field, Input } from "@/components/ui";
 import { browserClient } from "@/lib/supabase-browser";
-import { signInWithPassword, signUpWithPassword, verifySignupOtp, resendSignupOtp } from "@/app/actions/auth";
+import { signInWithPassword, signUpWithPassword, verifySignupOtp, resendSignupOtp, requestPasswordReset } from "@/app/actions/auth";
 
 export default function LoginPage() {
   return (
@@ -18,7 +18,8 @@ function LoginInner() {
   const params = useSearchParams();
   const next = params.get("next") || "/";
   const [tab, setTab] = useState<"login" | "signup">("login");
-  const [stage, setStage] = useState<"form" | "otp">("form");
+  const [stage, setStage] = useState<"form" | "otp" | "forgot">("form");
+  const [resetEmail, setResetEmail] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [companyName, setCompanyName] = useState("");
@@ -79,6 +80,25 @@ function LoginInner() {
     setInfo(null);
   }
 
+  function onOpenForgot() {
+    setStage("forgot");
+    setResetEmail(email);
+    setError(null);
+    setInfo(null);
+  }
+
+  function onRequestReset(e: React.FormEvent) {
+    e.preventDefault();
+    setError(null);
+    setInfo(null);
+    startTransition(async () => {
+      const origin = typeof window !== "undefined" ? window.location.origin : "";
+      const result = await requestPasswordReset(resetEmail.trim(), origin);
+      if (result?.error) setError(result.error);
+      else setInfo(`${resetEmail} にパスワード再設定用のリンクを送信しました。メールをご確認ください。`);
+    });
+  }
+
   async function onGoogle() {
     const sb = browserClient();
     const origin = typeof window !== "undefined" ? window.location.origin : "";
@@ -121,7 +141,39 @@ function LoginInner() {
         </div>
         <div style={{ fontSize: 11, color: "var(--foreground-500)" }}>© {new Date().getFullYear()} Kaikei Cloud, Inc. · プライバシー · 利用規約</div>
       </div>
-      {stage === "form" ? (
+      {stage === "forgot" ? (
+        <form onSubmit={onRequestReset} style={{ padding: "64px 56px", display: "flex", flexDirection: "column", justifyContent: "center", background: "var(--zinc-50)" }}>
+          <h2 style={{ fontSize: 22, margin: "0 0 6px", fontWeight: 700 }}>パスワードの再設定</h2>
+          <p style={{ color: "var(--foreground-500)", margin: "0 0 24px", fontSize: 13 }}>
+            登録済みのメールアドレスを入力してください。再設定リンクをお送りします。
+          </p>
+          {info && (
+            <div className="alert" style={{ background: "#d1f1e0", color: "#0a6a3a", marginBottom: 14 }}>
+              <Icon name="CheckCircle" size={16} /><span>{info}</span>
+            </div>
+          )}
+          {error && (
+            <div className="alert" style={{ background: "#fdd0df", color: "#920b3a", marginBottom: 14 }}>
+              <Icon name="AlertCircle" size={16} /><span>{error}</span>
+            </div>
+          )}
+          <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+            <Field label="メールアドレス" required span={12}>
+              <Input type="email" placeholder="you@example.co.jp" value={resetEmail} onChange={(e) => setResetEmail(e.target.value)} required />
+            </Field>
+            <Button variant="primary" size="lg" type="submit" disabled={isPending || !resetEmail}>
+              {isPending ? "送信中..." : "再設定リンクを送信"}
+            </Button>
+            <button
+              type="button"
+              onClick={onBackToForm}
+              style={{ background: "none", border: "none", color: "var(--foreground-500)", fontSize: 12, cursor: "pointer", marginTop: 4 }}
+            >
+              ← ログインに戻る
+            </button>
+          </div>
+        </form>
+      ) : stage === "form" ? (
         <form onSubmit={onSubmit} style={{ padding: "64px 56px", display: "flex", flexDirection: "column", justifyContent: "center", background: "var(--zinc-50)" }}>
           <div className="tabs" style={{ marginBottom: 24, alignSelf: "flex-start" }}>
             <span className={`tb-tab ${tab === "login" ? "active" : ""}`} onClick={() => setTab("login")} style={{ cursor: "pointer" }}>ログイン</span>
@@ -155,7 +207,13 @@ function LoginInner() {
                 <label style={{ display: "flex", alignItems: "center", gap: 6 }}>
                   <input type="checkbox" defaultChecked /> ログイン状態を保持
                 </label>
-                <a href="#" style={{ color: "var(--primary)" }}>パスワードを忘れた</a>
+                <button
+                  type="button"
+                  onClick={onOpenForgot}
+                  style={{ background: "none", border: "none", padding: 0, cursor: "pointer", color: "var(--primary)", fontSize: 12 }}
+                >
+                  パスワードを忘れた
+                </button>
               </div>
             )}
             <Button variant="primary" size="lg" type="submit" disabled={isPending}>

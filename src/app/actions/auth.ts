@@ -63,6 +63,23 @@ export async function resendSignupOtp(email: string) {
   return { ok: true as const };
 }
 
+export async function requestPasswordReset(email: string, origin: string) {
+  const sb = await actionClient();
+  const { error } = await sb.auth.resetPasswordForEmail(email, {
+    redirectTo: `${origin}/auth/callback?next=/auth/reset-password`,
+  });
+  if (error) return { error: error.message };
+  return { ok: true as const };
+}
+
+export async function updatePassword(newPassword: string) {
+  const sb = await actionClient();
+  const { error } = await sb.auth.updateUser({ password: newPassword });
+  if (error) return { error: error.message };
+  revalidatePath("/", "layout");
+  redirect("/");
+}
+
 export async function signOut() {
   const sb = await actionClient();
   await sb.auth.signOut();
