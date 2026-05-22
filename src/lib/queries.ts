@@ -1,5 +1,39 @@
 import { DEMO_COMPANY_ID, serverClient } from "./supabase";
-import type { Account, BankAccount, BankTransaction, Company, Invoice, InvoiceItem, JournalEntry, JournalLine, Partner } from "./database.types";
+import type { Account, BankAccount, BankTransaction, Company, DeliveryNote, DeliveryNoteItem, Invoice, InvoiceItem, JournalEntry, JournalLine, Partner } from "./database.types";
+
+export type DeliveryNoteWithItems = DeliveryNote & {
+  partner: Partner | null;
+  items: DeliveryNoteItem[];
+};
+
+export async function listDeliveryNotes(
+  companyId: string = DEMO_COMPANY_ID,
+): Promise<Array<DeliveryNote & { partner: Partner | null }>> {
+  const sb = await serverClient();
+  const { data, error } = await sb
+    .from("delivery_notes")
+    .select("*, partner:partners(*)")
+    .eq("company_id", companyId)
+    .order("delivery_date", { ascending: false });
+  if (error) throw error;
+  return (data ?? []) as Array<DeliveryNote & { partner: Partner | null }>;
+}
+
+export async function getDeliveryNote(
+  id: string,
+  companyId: string = DEMO_COMPANY_ID,
+): Promise<DeliveryNoteWithItems | null> {
+  const sb = await serverClient();
+  const { data, error } = await sb
+    .from("delivery_notes")
+    .select("*, partner:partners(*), items:delivery_note_items(*)")
+    .eq("id", id)
+    .eq("company_id", companyId)
+    .order("line_no", { ascending: true, referencedTable: "delivery_note_items" })
+    .single();
+  if (error) return null;
+  return data as DeliveryNoteWithItems;
+}
 
 export async function listBankAccounts(
   companyId: string = DEMO_COMPANY_ID,

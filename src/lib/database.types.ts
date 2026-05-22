@@ -105,6 +105,39 @@ export type BankAccount = {
   created_at: string;
 };
 
+export type DeliveryNote = {
+  id: string;
+  company_id: string;
+  delivery_no: string;
+  delivery_date: string;
+  partner_id: string | null;
+  subject: string | null;
+  notes: string | null;
+  subtotal: number;
+  tax_total: number;
+  total: number;
+  status: "draft" | "sent" | "invoiced" | "cancelled";
+  invoice_id: string | null;
+  pdf_path: string | null;
+  created_by: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+export type DeliveryNoteItem = {
+  id: string;
+  delivery_note_id: string;
+  line_no: number;
+  item_code: string | null;
+  item_name: string | null;
+  transaction_date: string | null;
+  quantity: number | null;
+  unit: string | null;
+  unit_price: number | null;
+  tax_rate: number;
+  amount: number;
+};
+
 export type JournalEntry = {
   id: string;
   company_id: string;

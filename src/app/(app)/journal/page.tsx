@@ -80,7 +80,7 @@ export default async function JournalListPage() {
               const total = e.lines.filter((l) => l.side === "debit").reduce((s, l) => s + l.amount_jpy, 0);
               return (
                 <tr key={e.id}>
-                  <td onClick={(ev) => ev.stopPropagation()}><input type="checkbox" /></td>
+                  <td><input type="checkbox" /></td>
                   <td>{fmtDate(e.entry_date)}</td>
                   <td><span className="code">{e.voucher_no ?? "—"}</span></td>
                   <td style={{ maxWidth: 280, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{e.description ?? "—"}</td>
