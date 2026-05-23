@@ -1,5 +1,39 @@
 import { DEMO_COMPANY_ID, serverClient } from "./supabase";
-import type { Account, BankAccount, BankTransaction, Company, DeliveryNote, DeliveryNoteItem, Invoice, InvoiceItem, JournalEntry, JournalLine, Partner } from "./database.types";
+import type { Account, BankAccount, BankTransaction, Company, DeliveryNote, DeliveryNoteItem, Estimate, EstimateItem, Invoice, InvoiceItem, JournalEntry, JournalLine, Partner } from "./database.types";
+
+export type EstimateWithItems = Estimate & {
+  partner: Partner | null;
+  items: EstimateItem[];
+};
+
+export async function listEstimates(
+  companyId: string = DEMO_COMPANY_ID,
+): Promise<Array<Estimate & { partner: Partner | null }>> {
+  const sb = await serverClient();
+  const { data, error } = await sb
+    .from("estimates")
+    .select("*, partner:partners(*)")
+    .eq("company_id", companyId)
+    .order("estimate_date", { ascending: false });
+  if (error) throw error;
+  return (data ?? []) as Array<Estimate & { partner: Partner | null }>;
+}
+
+export async function getEstimate(
+  id: string,
+  companyId: string = DEMO_COMPANY_ID,
+): Promise<EstimateWithItems | null> {
+  const sb = await serverClient();
+  const { data, error } = await sb
+    .from("estimates")
+    .select("*, partner:partners(*), items:estimate_items(*)")
+    .eq("id", id)
+    .eq("company_id", companyId)
+    .order("line_no", { ascending: true, referencedTable: "estimate_items" })
+    .single();
+  if (error) return null;
+  return data as EstimateWithItems;
+}
 
 export type DeliveryNoteWithItems = DeliveryNote & {
   partner: Partner | null;
