@@ -19,8 +19,12 @@ ENV NEXT_TELEMETRY_DISABLED=1
 ENV PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1
 # NEXT_PUBLIC_* vars are inlined at build time — hardcoded here because the anon
 # key is a public value by design and Zeabur only injects env vars at runtime.
+# ⚠️ 2026-07-31：这里是 ENV 直接硬编码，连 build-arg 覆盖的余地都没有 —— 是**唯一生效**的值。
+#    NEXT_PUBLIC_* 在 Next.js 构建期内联，Zeabur 面板改 env 对本站无效。
+#    已从 legacy anon JWT 换成新版 publishable key（公开值，非密钥），
+#    以便共享库停用 legacy anon/service_role 后本站仍可用。
 ENV NEXT_PUBLIC_SUPABASE_URL=https://wfstwbeehomzdudvikbt.supabase.co
-ENV NEXT_PUBLIC_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Indmc3R3YmVlaG9temR1ZHZpa2J0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk3MjE5MDAsImV4cCI6MjA4NTI5NzkwMH0.IZpw9YGjz09Yl-PDR8_SYRHBdTwqEDdQeJvQBVo7Xdw
+ENV NEXT_PUBLIC_SUPABASE_ANON_KEY=sb_publishable_P_RNgoORY0nqqbXUWkBuZw_M7jkhGe3
 RUN npm run build
 
 FROM node:22-alpine AS runner
